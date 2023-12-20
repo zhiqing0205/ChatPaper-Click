@@ -1,0 +1,1 @@
+gunicorn -c gunicorn_config.py app:app -p app.pid -D
