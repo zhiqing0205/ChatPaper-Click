@@ -576,7 +576,7 @@ class Reader:
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_conclusion(self, text, conclusion_prompt_token=8000):
+    def chat_conclusion(self, text, conclusion_prompt_token=800):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
@@ -631,7 +631,7 @@ class Reader:
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_method(self, text, method_prompt_token=8000):
+    def chat_method(self, text, method_prompt_token=800):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
@@ -687,7 +687,7 @@ class Reader:
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_summary(self, text, summary_prompt_token=11000):
+    def chat_summary(self, text, summary_prompt_token=1100):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
