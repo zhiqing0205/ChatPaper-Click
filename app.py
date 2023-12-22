@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, url_for, send_file
+from flask import Flask, request, render_template, url_for, send_file, jsonify
 import requests
 import os
 import hashlib
@@ -30,9 +30,24 @@ def get_db_connection():
 def get_file_path(md5_hash):
     conn = get_db_connection()
     cursor = conn.execute("SELECT file_path FROM paper WHERE md5_hash=?", (md5_hash,))
-    file_path = cursor.fetchone()[0]
+    try:
+        file_path = cursor.fetchone()[0]
+    except TypeError:
+        print("File does not exist.")
+        file_path = None
     conn.close()
     return file_path
+
+# 根据MD5哈希值获取文件解析结果
+def get_analysis_result(md5_hash):
+    conn = get_db_connection()
+    cursor = conn.execute("SELECT result FROM paper WHERE md5_hash=?", (md5_hash,))
+    try:
+        result = cursor.fetchone()[0]
+    except TypeError:
+        result = None
+    conn.close()
+    return result
 
 def download_pdf(url):
     response = requests.get(url)
@@ -112,12 +127,29 @@ def download_file():
 
 @app.route('/analysis', methods=['POST'])
 def analysis():
-    md5_hash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+    data = request.get_json()
+    file_path = data['file_path']
+    print(file_path)
+
+    # 提取文件名
+    file_name = file_path.split('/')[-1].split('.')[0]
+    # 文件名作为MD5哈希值
+    md5_hash = file_name
+    # 获取文件解析结果
+    result = get_analysis_result(md5_hash)
+    if result:
+        # 返回JSON格式的响应
+        return jsonify(result=result)
+
+    # 文件解析
+    title, content, result = chat_paper_function(file_path)
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     ip = request.remote_addr
-    title, content, result = chat_paper_function(file_path)
-    print(title, content, result, md5_hash, timestamp, ip)
+    # print(title, content, result, md5_hash, timestamp, ip)
+    # content是dict.values()的结果，需要转换成字符串
+    content = '\n'.join(content)
     save_to_database(timestamp, ip, file_path, md5_hash, content, result)
+    return result
 
 
 @app.route('/', methods=['GET'])
