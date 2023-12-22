@@ -149,7 +149,7 @@ def analysis():
     # content是dict.values()的结果，需要转换成字符串
     content = '\n'.join(content)
     save_to_database(timestamp, ip, file_path, md5_hash, content, result)
-    return result
+    return jsonify(result=result)
 
 
 @app.route('/', methods=['GET'])
