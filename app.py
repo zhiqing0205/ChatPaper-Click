@@ -26,7 +26,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def download_file(url):
+def download_pdf(url):
     response = requests.get(url)
     if response.headers['Content-Type'] != 'application/pdf':
         raise ValueError("URL does not contain a PDF file.")
@@ -66,16 +66,9 @@ def upload():
         return "No PDF URL provided", 400
 
     try:
-        file_path = download_file(pdf_url)
+        file_path = download_pdf(pdf_url)
     except ValueError as e:
         return str(e), 400
-
-    # md5_hash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
-    # timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    # ip = request.remote_addr
-    # title, content, result = chat_paper_function(file_path)
-    # print(title, content, result, md5_hash, timestamp, ip)
-    # save_to_database(timestamp, ip, file_path, md5_hash, content, result)
 
     # file_path 需要变成静态文件的URL
     file_path = file_path.replace('\\', '/')
@@ -100,6 +93,16 @@ def download_file():
         return send_file(file_object, as_attachment=True, download_name=file_name)
     else:
         return "文件下载失败", 400
+
+
+@app.route('/analysis', methods=['POST'])
+def analysis():
+    md5_hash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    ip = request.remote_addr
+    title, content, result = chat_paper_function(file_path)
+    print(title, content, result, md5_hash, timestamp, ip)
+    save_to_database(timestamp, ip, file_path, md5_hash, content, result)
 
 
 @app.route('/', methods=['GET'])
