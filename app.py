@@ -82,6 +82,25 @@ def upload():
     pdf_url = url_for('static', filename=file_path.split('static/')[1])
     return render_template('display_results.html', pdf_url=pdf_url)
 
+@app.route('/download', methods=['POST'])
+def download_file():
+    data = request.get_json()
+    url = data['url']
+
+    # 文件名为url最后一部分
+    file_name = url.split('/')[-1]
+    print(file_name)
+    
+    # 使用requests下载文件
+    response = requests.get(url)
+    if response.status_code == 200:
+        # 将下载的文件转换为BytesIO对象
+        file_object = BytesIO(response.content)
+        file_object.seek(0)
+        return send_file(file_object, as_attachment=True, download_name=file_name)
+    else:
+        return "文件下载失败", 400
+
 
 @app.route('/', methods=['GET'])
 def index():
