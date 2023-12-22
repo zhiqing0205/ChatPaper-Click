@@ -1,12 +1,15 @@
-from flask import Flask, request, render_template, url_for
+from flask import Flask, request, render_template, url_for, send_file
 import requests
 import os
 import hashlib
 import sqlite3
 from datetime import datetime
 from chat_paper import chat_paper_function
+from io import BytesIO
+from flask_cors import CORS  # 导入CORS
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)  # 设置跨域
 
 # 数据库初始化
 def init_db():
@@ -78,6 +81,7 @@ def upload():
     file_path = file_path.replace('\\', '/')
     pdf_url = url_for('static', filename=file_path.split('static/')[1])
     return render_template('display_results.html', pdf_url=pdf_url)
+
 
 @app.route('/', methods=['GET'])
 def index():
