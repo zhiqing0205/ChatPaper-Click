@@ -26,11 +26,26 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# 根据MD5哈希值获取文件路径
+def get_file_path(md5_hash):
+    conn = get_db_connection()
+    cursor = conn.execute("SELECT file_path FROM paper WHERE md5_hash=?", (md5_hash,))
+    file_path = cursor.fetchone()[0]
+    conn.close()
+    return file_path
+
 def download_pdf(url):
     response = requests.get(url)
     if response.headers['Content-Type'] != 'application/pdf':
         raise ValueError("URL does not contain a PDF file.")
     
+    # 使用MD5哈希值作为文件名 如果文件已经存在则直接返回文件路径
+    file_md5 = hashlib.md5(response.content).hexdigest()
+    file_path = get_file_path(file_md5)
+    if file_path:
+        return file_path
+    
+    # 保存文件到本地
     static_dir = 'static'
     pdf_dir = 'pdf'
     date_path = datetime.now().strftime('%Y/%m/%d')
@@ -38,7 +53,7 @@ def download_pdf(url):
     if not os.path.exists(base_dir):
         os.makedirs(base_dir)
     
-    file_name = hashlib.md5(response.content).hexdigest() + ".pdf"
+    file_name = file_md5 + '.pdf'
     file_path = os.path.join(base_dir, file_name)
     with open(file_path, 'wb') as f:
         f.write(response.content)
