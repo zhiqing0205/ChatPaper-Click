@@ -476,8 +476,8 @@ class Reader:
                     summary_prompt_token = offset + 1000 + 150
                     chat_summary_text = self.chat_summary(text=text, summary_prompt_token=summary_prompt_token)
 
-            htmls.append('## Paper:' + str(paper_index + 1))
-            htmls.append('\n\n\n')
+            # htmls.append('## Paper:' + str(paper_index + 1))
+            # htmls.append('\n\n\n')
             htmls.append(chat_summary_text)
 
             # 第二步总结方法：
@@ -571,12 +571,12 @@ class Reader:
 
             htmls = []
 
-            return paper.title, paper.section_text_dict.values(), result
+        return paper_list[0].title, paper_list[0].section_text_dict.values(), result
 
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_conclusion(self, text, conclusion_prompt_token=800):
+    def chat_conclusion(self, text, conclusion_prompt_token=8000):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
@@ -620,17 +620,18 @@ class Reader:
         result = ''
         for choice in response.choices:
             result += choice.message.content
-        print("conclusion_result:\n", result)
+        # print("conclusion_result:\n", result)
+        print('chat_conclusion')
         print("prompt_token_used:", response.usage.prompt_tokens,
               "completion_token_used:", response.usage.completion_tokens,
               "total_token_used:", response.usage.total_tokens)
-        print("response_time:", response.response_ms / 1000.0, 's')
+        # print("response_time:", response.response_ms / 1000.0, 's')
         return result
 
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_method(self, text, method_prompt_token=800):
+    def chat_method(self, text, method_prompt_token=8000):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
@@ -675,17 +676,18 @@ class Reader:
         result = ''
         for choice in response.choices:
             result += choice.message.content
-        print("method_result:\n", result)
+        # print("method_result:\n", result)
+        print('chat_method')
         print("prompt_token_used:", response.usage.prompt_tokens,
               "completion_token_used:", response.usage.completion_tokens,
               "total_token_used:", response.usage.total_tokens)
-        print("response_time:", response.response_ms / 1000.0, 's')
+        # print("response_time:", response.response_ms / 1000.0, 's')
         return result
 
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_summary(self, text, summary_prompt_token=1100):
+    def chat_summary(self, text, summary_prompt_token=11000):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
@@ -739,11 +741,12 @@ class Reader:
         result = ''
         for choice in response.choices:
             result += choice.message.content
-        print("summary_result:\n", result)
+        # print("summary_result:\n", result)
+        print('chat_summary')
         print("prompt_token_used:", response.usage.prompt_tokens,
               "completion_token_used:", response.usage.completion_tokens,
               "total_token_used:", response.usage.total_tokens)
-        print("response_time:", response.response_ms / 1000.0, 's')
+        # print("response_time:", response.response_ms / 1000.0, 's')
         return result
 
     def export_to_markdown(self, text, file_name, mode='w'):
