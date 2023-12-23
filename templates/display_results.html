@@ -3,12 +3,46 @@
 <head>
     <title>PDF and Results</title>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 防止页面滚动 */
+        }
         .container {
             display: flex;
         }
         .pdf-viewer, .results {
             flex: 1;
-            padding: 10px;
+            padding: 25px;
+            overflow-y: auto; /* 添加滚动条 */
+        }
+        #pdf-button {
+            display: none; /* 初始隐藏按钮 */
+            position: fixed;
+            bottom: 2%; /* 使用百分比来定义距离底部的距离 */
+            right: 2%; /* 使用百分比来定义距离右侧的距离 */
+            width: 60px;
+            height: 60px;
+            padding: 2%; /* 使用百分比来定义按钮内边距 */
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            line-height: 60px;
+            font-size: 25px;
+            border-radius: 50%; /* 将按钮变成圆形 */
+            opacity: 0.8; /* 设置不透明度 */
+            cursor: pointer;
+        }
+        #pdf-button:hover {
+            opacity: 1; /* 鼠标悬停时增加不透明度 */
+        }
+        @media only screen and (max-width: 1024px) {
+            .pdf-viewer {
+                display: none; /* 在移动设备上隐藏左侧的PDF */
+            }
+            #pdf-button {
+                display: block; /* 显示跳转按钮 */
+            }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -19,15 +53,17 @@
             <iframe src="{{ pdf_url }}" width="100%" style="border: none;"></iframe>
         </div>
         <div class="results">
-            <h2>Analysis Result:</h2>
-            <div id="result">使用GPT4解析中，请稍候……</div>
+            <h2 style="font-size: 2em;">Analysis Result:</h2>
+            <div id="result" style="font-size: 1.2em;">使用GPT4解析中，请稍候……</div>
         </div>
     </div>
+    <!-- 移动设备上的跳转按钮 -->
+    <div id="pdf-button" onclick="window.location.href='{{ pdf_url }}'">PDF</div>
     <script>
         // 在页面加载完成之后，把iframe的高度设置为屏幕高度
         document.addEventListener('DOMContentLoaded', function() {
             var pdf_viewer = document.querySelector('.pdf-viewer iframe');
-            pdf_viewer.height = window.innerHeight - 40;
+            pdf_viewer.height = window.innerHeight - 50;
         });
         // 在iframe加载完成之后，把iframe的内容发送到服务器
         document.addEventListener('DOMContentLoaded', function() {
