@@ -62,6 +62,25 @@
                 }));
             }
         });
+        // 写一个定时器，三分钟的，如果三分钟后<div id="result">使用GPT4解析中，请稍候……</div>依然是，那就触发一次刷新，重新加载一次    
+        setTimeout(function() {
+            var result_div = document.getElementById('result');
+            if (result_div.innerHTML.includes('使用GPT4解析中，请稍候')) {
+                location.reload();
+            }
+        }, 180000);
+
+        var timer = 180;
+        var interval = setInterval(function() {
+            timer--;
+            if (timer == 0) {
+                clearInterval(interval);
+            }
+            var result_div = document.getElementById('result');
+            if (result_div.innerHTML.includes('使用GPT4解析中，请稍候')) {
+                result_div.innerHTML = '使用GPT4解析中，请稍候(' + Math.floor(timer / 60) + '分' + timer % 60 + '秒后刷新)';
+            }
+        }, 1000);
     </script>
 </body>
 </html>
