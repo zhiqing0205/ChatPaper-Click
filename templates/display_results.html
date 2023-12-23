@@ -11,16 +11,57 @@
             padding: 10px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="pdf-viewer">
-            <iframe src="{{ pdf_url }}" width="100%" height="800px"></iframe>
+            <iframe src="{{ pdf_url }}" width="100%" style="border: none;"></iframe>
         </div>
         <div class="results">
             <h2>Analysis Result:</h2>
-            <p>{{ result }}</p>
+            <div id="result">使用GPT4解析中，请稍候……</div>
         </div>
     </div>
+    <script>
+        // 在页面加载完成之后，把iframe的高度设置为屏幕高度
+        document.addEventListener('DOMContentLoaded', function() {
+            var pdf_viewer = document.querySelector('.pdf-viewer iframe');
+            pdf_viewer.height = window.innerHeight - 40;
+        });
+        // 在iframe加载完成之后，把iframe的内容发送到服务器
+        document.addEventListener('DOMContentLoaded', function() {
+            var pdf_viewer = document.querySelector('.pdf-viewer iframe');
+            pdf_viewer.onload = function() {
+                console.log('PDF loaded');
+                var pdf_window = pdf_viewer.contentWindow;
+                var pdf_document = pdf_window.document;
+                var pdf_body = pdf_document.body;
+                var pdf_url = pdf_window.location.href;
+                var xhr = new XMLHttpRequest();
+                // 设置超时时间
+                xhr.timeout = 360000;
+                xhr.open('POST', 'https://chatpaper.click/analysis', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        // print(response)
+                        var result = response.result;
+                        var result_div = document.getElementById('result');
+                        result_div.innerHTML = marked.parse(result);
+                    }
+                }
+                console.log('Sending PDF text to server');
+                
+                // 提取pdf文件名 去除https://chatpaper.click/部分
+                var file_path = pdf_url.replace('https://chatpaper.click/', '');
+                console.log(file_path);
+                xhr.send(JSON.stringify({
+                    'file_path': file_path
+                }));
+            }
+        });
+    </script>
 </body>
 </html>
