@@ -123,7 +123,9 @@ def download_file():
 def analysis():
     data = request.get_json()
     file_path = data['file_path']
-    print(file_path)
+    # print('file_path: !!!!!!')
+    # print(file_path)
+    # return 'success'
 
     # 提取文件名
     file_name = file_path.split('/')[-1].split('.')[0]
@@ -147,6 +149,20 @@ def analysis():
 @app.route('/', methods=['GET'])
 def index():
     return 'hello world'
+
+@app.route('/detail', methods=['GET'])
+def detail():
+    pdf_md5 = request.args.get('pdf_md5')
+
+    # 获取文件路径
+    file_path = get_file_path(pdf_md5)
+    if not file_path:
+        return "File does not exist.", 400
+    
+    # file_path 需要变成静态文件的URL
+    file_path = file_path.replace('\\', '/')
+    pdf_url = url_for('static', filename=file_path.split('static/')[1])
+    return render_template('display_results.html', pdf_url=pdf_url)
 
 
 if __name__ == '__main__':
