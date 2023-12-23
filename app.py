@@ -83,9 +83,19 @@ def download_pdf(url):
 
     return file_path
 
+def get_time_password():
+    now = datetime.now()
+    # 生成时间密码，四位数字，如：2020年12月31日 05:30 -> 0530
+    time_password = now.strftime('%H%M')
+    return time_password
+
 @app.route('/upload', methods=['GET'])
 def upload():
     pdf_url = request.args.get('pdf_url')
+    password = request.args.get('password')
+    print(password, get_time_password())
+    if password != get_time_password():
+        return "Password is incorrect.", 400
     if not pdf_url:
         return "No PDF URL provided", 400
 
@@ -102,7 +112,12 @@ def upload():
 @app.route('/download', methods=['POST'])
 def download_file():
     data = request.get_json()
+    password = data['password']
     url = data['url']
+
+    # 验证密码
+    if password != get_time_password():
+        return "Password is incorrect.", 400
 
     # 文件名为url最后一部分
     file_name = url.split('/')[-1]
