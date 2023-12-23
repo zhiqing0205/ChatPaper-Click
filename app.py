@@ -41,7 +41,7 @@ def get_file_path(md5_hash):
 # 将文件解析结果保存到数据库
 def save_to_database(timestamp, title, file_path, md5_hash, content, result):
     conn = get_db_connection()
-    conn.execute("INSERT INTO paper VALUES (?, ?, ?, ?, ?, ?, ?)", 
+    conn.execute("INSERT INTO paper VALUES (?, ?, ?, ?, ?, ?)", 
                  (timestamp, title, file_path, md5_hash, content, result))
     conn.commit()
     conn.close()
