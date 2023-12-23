@@ -15,7 +15,7 @@ CORS(app, supports_credentials=True)  # 设置跨域
 def init_db():
     conn = sqlite3.connect('paper.db')
     conn.execute('''CREATE TABLE IF NOT EXISTS paper 
-                    (timestamp TEXT, ip TEXT, file_path TEXT, md5_hash TEXT, content TEXT, result TEXT)''')
+                    (timestamp TEXT, title TEXT, file_path TEXT, md5_hash TEXT, content TEXT, result TEXT)''')
     conn.commit()
     conn.close()
 
@@ -37,6 +37,14 @@ def get_file_path(md5_hash):
         file_path = None
     conn.close()
     return file_path
+
+# 将文件解析结果保存到数据库
+def save_to_database(timestamp, title, file_path, md5_hash, content, result):
+    conn = get_db_connection()
+    conn.execute("INSERT INTO paper VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                 (timestamp, title, file_path, md5_hash, content, result))
+    conn.commit()
+    conn.close()
 
 # 根据MD5哈希值获取文件解析结果
 def get_analysis_result(md5_hash):
@@ -74,20 +82,6 @@ def download_pdf(url):
         f.write(response.content)
 
     return file_path
-
-def parse_file(file_path):
-    # 这里应该是您的文件解析逻辑
-    # 例如，读取PDF文件并提取文本内容
-    content = "Extracted content from the PDF"
-    result = "Analysis result based on the content"
-    return content, result
-
-def save_to_database(timestamp, ip, file_path, md5_hash, content, result):
-    conn = get_db_connection()
-    conn.execute("INSERT INTO paper VALUES (?, ?, ?, ?, ?, ?)", 
-                 (timestamp, ip, file_path, md5_hash, content, result))
-    conn.commit()
-    conn.close()
 
 @app.route('/upload', methods=['GET'])
 def upload():
@@ -144,11 +138,9 @@ def analysis():
     # 文件解析
     title, content, result = chat_paper_function(file_path)
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    ip = request.remote_addr
-    # print(title, content, result, md5_hash, timestamp, ip)
     # content是dict.values()的结果，需要转换成字符串
     content = '\n'.join(content)
-    save_to_database(timestamp, ip, file_path, md5_hash, content, result)
+    save_to_database(timestamp, title, file_path, md5_hash, content, result)
     return jsonify(result=result)
 
 
