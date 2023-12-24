@@ -163,7 +163,7 @@ def analysis():
 
 @app.route('/', methods=['GET'])
 def index():
-    return 'hello world'
+    return render_template('index.html')
 
 @app.route('/detail', methods=['GET'])
 def detail():
@@ -178,6 +178,30 @@ def detail():
     file_path = file_path.replace('\\', '/')
     pdf_url = url_for('static', filename=file_path.split('static/')[1])
     return render_template('display_results.html', pdf_url=pdf_url)
+
+@app.route('/upload_file', methods=['POST'])
+def upload_file():
+    # 获取文件
+    file = request.files['file']
+    password = request.form.get('password')
+    if password != get_time_password():
+        return "Password is incorrect.", 400
+    # 保存文件到本地
+    static_dir = 'static'
+    pdf_dir = 'pdf'
+    date_path = datetime.now().strftime('%Y/%m/%d')
+    base_dir = os.path.join(static_dir, pdf_dir, date_path)
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
+    
+    file_name = file.filename
+    file_path = os.path.join(base_dir, file_name)
+    file.save(file_path)
+
+    # file_path 需要变成静态文件的URL
+    file_path = file_path.replace('\\', '/')
+    pdf_url = url_for('static', filename=file_path.split('static/')[1])
+    return jsonify(pdf_url=pdf_url)
 
 
 if __name__ == '__main__':

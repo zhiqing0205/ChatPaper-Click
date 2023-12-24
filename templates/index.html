@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatPaper.Click</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 35%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .slogan {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .upload-btn, .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 25px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .upload-btn:hover, .submit-btn:hover {
+            background-color: #45a049;
+        }
+        .url-input {
+            width: 70%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ChatPaper.Click</h1>
+        <p class="slogan">轻松科研一触即达</p>
+        <input type="file" id="fileInput" style="display: none;" />
+        <button class="upload-btn" onclick="selectFile()">选择文件上传</button>
+        <br/>
+        <input type="text" id="urlInput" class="url-input" placeholder="输入PDF文件URL地址">
+        <button class="submit-btn" onclick="uploadUrl()">上传解析</button>
+    </div>
+    <script>
+        function selectFile() {
+            document.getElementById('fileInput').click();
+        }
+
+        function uploadUrl() {
+            var url = document.getElementById('urlInput').value;
+            console.log("URL submitted:", url);
+            // 在这里添加逻辑来处理URL上传
+            var password = prompt("请输入密码：");
+            window.location.href = "/upload?pdf_url=" + url + "&password=" + password;
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            var file = event.target.files[0];
+            console.log("File selected:", file.name);
+            // 在这里添加逻辑来处理文件上传
+            var password = prompt("请输入密码：");
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('password', password);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload_file');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    console.log("File uploaded successfully.");
+                    console.log("PDF URL:", xhr.responseText);
+                    var response = JSON.parse(xhr.responseText);
+                    var pdf_url = response.pdf_url;
+                    pdf_url = 'https://chatpaper.click' + pdf_url;
+                    window.location.href = "/upload?pdf_url=" + pdf_url + "&password=" + password;
+                } else {
+                    console.log("File upload failed.");
+                }
+            };
+
+            xhr.send(formData);
+
+        });
+    </script>
+</body>
+</html>
